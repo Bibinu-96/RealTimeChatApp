@@ -1,0 +1,79 @@
+# Node.js-related ignores
+node_modules/
+package-lock.json
+yarn.lock
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE/editor-specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Test coverage reports
+coverage/
+
+# Compiled JavaScript
+*.js.map
+
+# Golang-related ignores
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of `go build` and `go run`
+/bin/
+/obj/
+/out/
+*.out
+
+# Vendor dependencies
+/vendor/
+
+# Cache files
+*.cache
+
+# Go module files
+/go.sum
+/go.mod
+
+# Test and debugging artifacts
+*.cover
+*.prof
+
+# IDE/editor-specific files (Go-related)
+*.vscode/
+*.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# OS-specific files
+.DS_Store

@@ -1,0 +1,27 @@
+ get all chat from user to source
+ get all messages in group for web
+ websocket for user to user messages 
+ websocket for group messages
+
+
+
+ awesome-project/
+├── cmd/                # Main applications for this project
+│   └── awesome-app/    # Main application entry point
+│       └── main.go     # `package main` file
+├── internal/           # Private application packages
+│   ├── database/       # Database logic
+│   ├── auth/           # Authentication logic
+│   └── user/           # User domain logic
+├── pkg/                # Publicly reusable packages
+│   ├── logger/         # Logging utilities
+│   └── config/         # Configuration handling
+├── api/                # API specs and generated files
+├── configs/            # Configuration files
+├── docs/               # Documentation and diagrams
+├── scripts/            # Helper scripts for CI/CD
+├── test/               # Integration tests
+├── go.mod              # Go module definition
+├── go.sum              # Dependency checksums
+└── README.md           # Project overview
+

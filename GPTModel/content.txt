@@ -1,0 +1,4 @@
+docker run -p 8000:8000  --network host bibinu1996/ollamapythonclient:latest
+docker run --network host bibinu1996/ollamapythonclient:optimised
+docker run --network host -d bibinu1996/ollamapythonclient:optimised1
+docker run --network host -d bibinu1996/ollamapythonclient:optimised

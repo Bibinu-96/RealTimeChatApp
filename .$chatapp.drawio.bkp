@@ -1,0 +1,51 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
+  <diagram name="Page-1" id="e-_rjHWBKs5zdJeb_fgG">
+    <mxGraphModel dx="1482" dy="907" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-1" target="Zpi4Dd2-v7HJmbPrOO6f-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-1" target="Zpi4Dd2-v7HJmbPrOO6f-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-1" value="websocket&lt;br&gt;or&lt;br&gt;gateway&lt;div&gt;many of such&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="220" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-2" value="chat session service&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="305" y="130" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-4" target="Zpi4Dd2-v7HJmbPrOO6f-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-4" value="group session&lt;div&gt;service&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-8" target="Zpi4Dd2-v7HJmbPrOO6f-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-8" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="30" y="212" width="30" height="60" as="geometry" />
+        </mxCell>
+        <object label="" manywebsockets="" id="Zpi4Dd2-v7HJmbPrOO6f-11">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.436;entryY=0.017;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-2" target="Zpi4Dd2-v7HJmbPrOO6f-1">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-13" value="Queue for chat or qroups service getting saved" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-14" value="rest api for storing chats in case of web&lt;div&gt;can be part of websocket&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="470" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Zpi4Dd2-v7HJmbPrOO6f-16" target="Zpi4Dd2-v7HJmbPrOO6f-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Zpi4Dd2-v7HJmbPrOO6f-16" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="470" width="30" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,27 @@
+
+// Postgres
+docker run --name postgres-container \
+-e POSTGRES_USER=myuser \
+-e POSTGRES_PASSWORD=mypassword \
+-e POSTGRES_DB=mydatabase \
+-p 5432:5432 \
+-v ~/postgres-data:/var/lib/postgresql/data \
+-d postgres
+
+//Postgres Cli
+sudo dnf install postgresql
+
+//golang container for working with backend
+already in system
+docker run -it -v /Users/vke/Desktop/Projects/APPS/ChatApp/RealTimeChatApp/backend:/app -w /app --name backend golang:latest
+
+have interface for interaction between every service
+
+Front End
+docker run -v /Users/vke/Desktop/Projects/APPS/ChatApp/RealTimeChatApp/frontend:/app -p 3001:3001 -it --name react react-dev-image:1
+
+go orms -> try to swtich between sql and no-sql
+ 
+ go open api ,recommened practises of java
+
+ 
