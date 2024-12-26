@@ -1,0 +1,10 @@
+Create a Open api config yaml for the chat app as below
+1)register api with email,username ,password
+2)login api with username and email 
+3) get all users connected to given user
+4) get all groups given the user
+4) get all messages from a sender given the receiver
+5) get all messages given the group Id
+
+/Users/vke/go/bin/oapi-codegen -generate types,server,client -package api/openapi api/openapi/openapispec.yaml > opeapi.gen.go
+/Users/vke/go/bin/oapi-codegen -generate types,server,client -package openapi api/openapi/openapispec.yaml > api/openapi/openapi.gen.go
