@@ -15,23 +15,30 @@ type DBinitService struct {
 
 func (dbinit DBinitService) createorUpdateModelstoTables() error {
 
-	dbinit.Log.Debug("initialising db")
-
-	// var genericDB database.Database
-	// dsn := "host=localhost user=youruser password=yourpassword dbname=yourdb port=5432 sslmode=disable"
-	// genericDB = database.PostgressDB{DSN: dsn}
-
-	err := dao.SetDb(dbinit.GenericDb)
+	err := dbinit.initDB()
 	if err != nil {
 		return err
 	}
-
 	db := dao.GetDB()
 	err = db.AutoMigrate(&models.User{}, &models.Group{}, &models.Message{}, &models.GroupMember{})
 	if err != nil {
 		dbinit.Log.Error("error creating or updating db")
 	}
+
 	return err
+}
+
+func (dbinit DBinitService) initDB() error {
+	dbinit.Log.Debug("initialising db")
+	db, err := dbinit.GenericDb.GetDB()
+	if err != nil {
+		return err
+	}
+
+	dao.SetDb(db)
+
+	return nil
+
 }
 
 func (dbinit DBinitService) Run() error {

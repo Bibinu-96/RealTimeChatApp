@@ -3,8 +3,6 @@ package dao
 import (
 	"sync"
 
-	"backend/internal/database/database"
-
 	"gorm.io/gorm"
 )
 
@@ -13,14 +11,8 @@ var (
 	once sync.Once
 )
 
-func SetDb(database database.Database) error {
-	var err error
-	db, err = database.GetDB()
-	if err != nil {
-		return err
-	}
-	return nil
-
+func SetDb(database *gorm.DB) {
+	db = database
 }
 
 // GetDB provides a singleton database connection
