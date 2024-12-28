@@ -1,6 +1,6 @@
 package dao
 
-import "chatbackend/internal/database/models"
+import "backend/internal/database/models"
 
 // CreateUser inserts a new user into the database
 func CreateUser(user *models.User) error {

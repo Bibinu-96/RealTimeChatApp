@@ -1,6 +1,6 @@
 package dao
 
-import "chatbackend/internal/database/models"
+import "backend/internal/database/models"
 
 // CreateGroup inserts a new group into the database
 func CreateGroup(group *models.Group) error {

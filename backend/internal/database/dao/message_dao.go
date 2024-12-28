@@ -1,6 +1,6 @@
 package dao
 
-import "chatbackend/internal/database/models"
+import "backend/internal/database/models"
 
 // SendMessage creates a new message (either direct or group)
 func SendMessage(message *models.Message) error {
