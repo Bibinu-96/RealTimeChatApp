@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"backend/cmd/app/service/dbinitservice"
-	"backend/cmd/app/service/logger"
 	"backend/cmd/app/service/server"
 	"backend/cmd/app/service/server/config"
 	"backend/cmd/app/service/server/router"
 	"backend/internal/database/database"
+	"backend/pkg/logger"
 )
 
 func main() {

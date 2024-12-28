@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"backend/cmd/app/service/logger"
+	"backend/pkg/logger"
 
 	"backend/cmd/app/service/server/config"
 )

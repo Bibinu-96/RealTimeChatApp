@@ -1,10 +1,10 @@
 package dbinitservice
 
 import (
-	"backend/cmd/app/service/logger"
 	"backend/internal/database/dao"
 	"backend/internal/database/database"
 	"backend/internal/database/models"
+	"backend/pkg/logger"
 )
 
 type DBinitService struct {
@@ -15,12 +15,8 @@ type DBinitService struct {
 
 func (dbinit DBinitService) createorUpdateModelstoTables() error {
 
-	err := dbinit.initDB()
-	if err != nil {
-		return err
-	}
 	db := dao.GetDB()
-	err = db.AutoMigrate(&models.User{}, &models.Group{}, &models.Message{}, &models.GroupMember{})
+	err := db.AutoMigrate(&models.User{}, &models.Group{}, &models.Message{}, &models.GroupMember{})
 	if err != nil {
 		dbinit.Log.Error("error creating or updating db")
 	}
@@ -42,6 +38,10 @@ func (dbinit DBinitService) initDB() error {
 }
 
 func (dbinit DBinitService) Run() error {
+	err := dbinit.initDB()
+	if err != nil {
+		return err
+	}
 	return dbinit.createorUpdateModelstoTables()
 
 }
