@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -32,9 +34,33 @@ func NewServer(config config.ServerConfig, name string, log logger.Logger) *Serv
 
 }
 
-func (s *Server) Run() error {
-	return s.Start()
+func (s *Server) Run(ctx context.Context) error {
+	errChan := make(chan error, 1)
+	go func() {
+		err := s.Start()
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	for {
+
+		select {
+		case <-ctx.Done():
+			s.log.Info("context cancelled", s.Name)
+			s.Server.Shutdown(ctx)
+			return errors.New("context cancelled")
+		case err := <-errChan:
+			s.log.Info("err occured", s.Name)
+			s.Server.Shutdown(ctx)
+			return err
+
+		}
+
+	}
+
 }
+
 func (s *Server) GetName() string {
 	return s.Name
 }
@@ -50,7 +76,9 @@ func (s *Server) Start() error {
 	err := s.Server.ListenAndServe()
 
 	if err != nil && err != http.ErrServerClosed {
+		return err
 	}
-	return err
+
+	return nil
 
 }

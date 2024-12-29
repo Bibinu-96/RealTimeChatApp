@@ -5,6 +5,7 @@ import (
 	"backend/internal/database/database"
 	"backend/internal/database/models"
 	"backend/pkg/logger"
+	"context"
 )
 
 type DBinitService struct {
@@ -37,7 +38,7 @@ func (dbinit DBinitService) initDB() error {
 
 }
 
-func (dbinit DBinitService) Run() error {
+func (dbinit DBinitService) Run(ctx context.Context) error {
 	err := dbinit.initDB()
 	if err != nil {
 		return err
