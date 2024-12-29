@@ -6,6 +6,7 @@ import (
 	"backend/cmd/app/service/server"
 	"backend/cmd/app/service/server/config"
 	"backend/cmd/app/service/server/router"
+	"backend/cmd/app/service/websocket"
 	"backend/internal/database/database"
 	"backend/pkg/logger"
 	"context"
@@ -52,24 +53,29 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	service1 := server.NewServer(serverConfig1, "GinApiServer", log)
-	components = append(components, service1)
+	ginApiServerervice := server.NewServer(serverConfig1, "GinApiServer", log)
+	components = append(components, ginApiServerervice)
 
-	// Chi Server
-	serverConfig2 := config.ServerConfig{
-		Addr:         ":8001",
-		Router:       router.SetupChiRouter(),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+	wsServer := websocket.Websocket{
+		Addr: ":8001",
+		Name: "websocket",
+		Log:  log,
 	}
-	service2 := server.NewServer(serverConfig2, "ChiApiServer", log)
-	components = append(components, service2)
+
+	components = append(components, &wsServer)
 
 	// Run all services
 	for _, component := range components {
 		wg.Add(1)
 		go func(c service.Service) {
 			defer wg.Done()
+
+			// Panic recovery wrapper
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error("Panic occurred in service", r, c.GetName())
+				}
+			}()
 			err := c.Run(ctx) // Pass context to allow graceful shutdown
 			if err != nil {
 				log.Error("Error occurred", err, c.GetName())

@@ -74,7 +74,6 @@ func (s *Server) Start() error {
 		WriteTimeout: s.WriteTimeout,
 	}
 	err := s.Server.ListenAndServe()
-
 	if err != nil && err != http.ErrServerClosed {
 		return err
 	}
