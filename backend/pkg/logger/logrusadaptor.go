@@ -1,13 +1,24 @@
 package logger
 
-import "github.com/sirupsen/logrus"
+import (
+	"sync"
+
+	"github.com/sirupsen/logrus"
+)
+
+var loggerInstance *LogrusLogger
+var once sync.Once
 
 type LogrusLogger struct {
 	logger *logrus.Logger
 }
 
-func NewLogrusLogger() *LogrusLogger {
-	return &LogrusLogger{logger: logrus.New()}
+func GetLogrusLogger() *LogrusLogger {
+	once.Do(func() {
+		loggerInstance = &LogrusLogger{logger: logrus.New()}
+	})
+
+	return loggerInstance
 }
 
 func (l *LogrusLogger) Info(msg string, args ...interface{}) {

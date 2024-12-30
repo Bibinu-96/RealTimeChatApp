@@ -23,7 +23,7 @@ func main() {
 	components := []service.Service{}
 
 	// Create a new logger instance
-	log = logger.NewLogrusLogger()
+	log = logger.GetLogrusLogger()
 	dsn := "host=localhost user=admin password=admin dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
 
 	// Create a context to handle shutdown signals

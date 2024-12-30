@@ -3,6 +3,8 @@ package router
 import (
 	"net/http"
 
+	"backend/internal/businesslogic"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +18,7 @@ func SetupGinRouter() *gin.Engine {
 		api.POST("/register", RegisterUser)
 		api.POST("/login", LoginUser)
 		api.GET("/users/connected", GetConnectedUsers)
-		api.GET("/groups", GetGroups)
+		api.GET("/groups/use", GetGroups)
 		api.GET("/messages/direct", GetDirectMessages)
 		api.GET("/messages/group", GetGroupMessages)
 	}
@@ -26,13 +28,36 @@ func SetupGinRouter() *gin.Engine {
 // RegisterUser handles user registration
 func RegisterUser(c *gin.Context) {
 
-	c.JSON(http.StatusOK, gin.H{"message": "empty logic"})
+	var register businesslogic.RegisterUser
+	err := c.BindJSON(&register)
+	if err == nil {
+		userService := businesslogic.GetUserServiceInstance()
+		err = userService.RegisterUserForApp(register)
+		if err != nil {
+			c.JSON(500, gin.H{"status": "internal server error"})
+		} else {
+			c.JSON(201, gin.H{"status": register.USERNAME})
+		}
+		return
+	}
+
 }
 
 // LoginUser handles user login
 func LoginUser(c *gin.Context) {
 	// Implement your logic here
-	c.JSON(http.StatusOK, gin.H{"message": "Login user logic not implemented from gin"})
+	var loginUser businesslogic.LOGIN
+	err := c.BindJSON(&loginUser)
+	if err == nil {
+		userService := businesslogic.GetUserServiceInstance()
+		err = userService.LoginUserForApp(loginUser)
+		if err != nil {
+			c.JSON(500, gin.H{"status": "internal server error"})
+		} else {
+			c.JSON(200, gin.H{"status": loginUser.EMAIL})
+		}
+	}
+
 }
 
 // GetConnectedUsers retrieves connected users
