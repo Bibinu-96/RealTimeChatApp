@@ -17,10 +17,10 @@ func SetupGinRouter() *gin.Engine {
 	{
 		api.POST("/register", RegisterUser)
 		api.POST("/login", LoginUser)
-		api.GET("/users/connected", GetConnectedUsers)
-		api.GET("/groups/use", GetGroups)
-		api.GET("/messages/direct", GetDirectMessages)
-		api.GET("/messages/group", GetGroupMessages)
+		api.GET("/users/connected", CheckAuth, GetConnectedUsers)
+		api.GET("/groups/", CheckAuth, GetGroups)
+		api.GET("/messages/direct", CheckAuth, GetDirectMessages)
+		api.GET("/messages/group", CheckAuth, GetGroupMessages)
 	}
 	return r
 }
@@ -34,9 +34,9 @@ func RegisterUser(c *gin.Context) {
 		userService := businesslogic.GetUserServiceInstance()
 		err = userService.RegisterUserForApp(register)
 		if err != nil {
-			c.JSON(500, gin.H{"status": "internal server error"})
+			c.JSON(400, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(201, gin.H{"status": register.USERNAME})
+			c.JSON(201, gin.H{"status": "success"})
 		}
 		return
 	}
@@ -50,11 +50,11 @@ func LoginUser(c *gin.Context) {
 	err := c.BindJSON(&loginUser)
 	if err == nil {
 		userService := businesslogic.GetUserServiceInstance()
-		err = userService.LoginUserForApp(loginUser)
+		token, err := userService.LoginUserForApp(loginUser)
 		if err != nil {
-			c.JSON(500, gin.H{"status": "internal server error"})
+			c.JSON(400, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(200, gin.H{"status": loginUser.EMAIL})
+			c.JSON(200, gin.H{"token": token})
 		}
 	}
 

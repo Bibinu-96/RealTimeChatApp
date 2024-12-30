@@ -6,6 +6,11 @@ import (
 	"backend/pkg/logger"
 	"errors"
 	"sync"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var (
@@ -13,6 +18,8 @@ var (
 	once     sync.Once
 	mutex    sync.Mutex
 )
+
+const Secret = "mychatapp"
 
 type RegisterUser struct {
 	USERNAME string `json:"username" binding:"required"`
@@ -41,22 +48,42 @@ func GetUserServiceInstance() *UserService {
 func (us UserService) RegisterUserForApp(toBeRegisteredUser RegisterUser) error {
 
 	userDao := dao.GetUserDaoInstance()
+	user, err := userDao.GetByEmail(toBeRegisteredUser.EMAIL)
 
-	user := models.User{Username: toBeRegisteredUser.USERNAME,
-		Email:        toBeRegisteredUser.EMAIL,
-		PasswordHash: toBeRegisteredUser.PASSWORD,
-		PhoneNumber:  &toBeRegisteredUser.PHONENO,
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		us.log.Error("error getting user", err)
+		return err
 	}
-	err := userDao.Create(&user)
+
+	if user != nil && user.UserID != 0 {
+		return errors.New("user already exist")
+	}
+
+	// Create Password Hash
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(toBeRegisteredUser.PASSWORD), bcrypt.DefaultCost)
 
 	if err != nil {
-		us.log.Error("error getting user", err)
+		us.log.Error("error encrypting password", err)
+		return err
+	}
+
+	user = &models.User{Username: toBeRegisteredUser.USERNAME,
+		Email:        toBeRegisteredUser.EMAIL,
+		PasswordHash: string(passwordHash),
+		PhoneNumber:  &toBeRegisteredUser.PHONENO,
+	}
+
+	err = userDao.Create(user)
+
+	if err != nil {
+		us.log.Error("error creating user", err)
 		return err
 	}
 	return nil
 
 }
-func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) error {
+func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) (string, error) {
 
 	userDao := dao.GetUserDaoInstance()
 
@@ -64,16 +91,32 @@ func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) error {
 
 	if err != nil {
 		us.log.Error("error getting user", err)
-		return err
-	}
-	isPasswordCorrect := toBeLoggedinUser.PASSWORD == user.PasswordHash
-
-	if !isPasswordCorrect {
-		err = errors.New("userid or password does not match")
-		us.log.Error(err.Error())
-		return err
+		return "", err
 	}
 
-	return nil
+	if user.UserID == 0 {
+		return "", errors.New("user not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(toBeLoggedinUser.PASSWORD))
+
+	if err != nil {
+		us.log.Error("username or password invalid", err)
+		return "", errors.New("username or password invalid")
+	}
+
+	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  user.Email,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := generateToken.SignedString([]byte(Secret))
+
+	if err != nil {
+		us.log.Error("error generating jwt token", err)
+		return "", errors.New("error generating jwt token")
+	}
+
+	return token, nil
 
 }
