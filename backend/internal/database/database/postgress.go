@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type PostgressDB struct {
@@ -13,7 +14,11 @@ type PostgressDB struct {
 
 func (postgressDb PostgressDB) GetDB() (*gorm.DB, error) {
 	var err error
-	db, err := gorm.Open(postgres.Open(postgressDb.DSN), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(postgressDb.DSN), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: false, // Use plural table names
+		},
+	})
 	if err != nil {
 		fmt.Println("Error getting *sql.DB object:", err)
 		return nil, err

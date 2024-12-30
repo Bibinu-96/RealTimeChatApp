@@ -24,6 +24,7 @@ func main() {
 
 	// Create a new logger instance
 	log = logger.NewLogrusLogger()
+	dsn := "host=localhost user=admin password=admin dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
 
 	// Create a context to handle shutdown signals
 	ctx, cancel := context.WithCancel(context.Background())
@@ -42,7 +43,7 @@ func main() {
 	dbInitService := dbinitservice.DBinitService{
 		Log:       log,
 		Name:      "DBInitService",
-		GenericDb: database.PostgressDB{DSN: os.Getenv("POSTGRES_DSN")},
+		GenericDb: database.PostgressDB{DSN: dsn},
 	}
 	components = append(components, &dbInitService)
 

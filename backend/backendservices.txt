@@ -25,3 +25,18 @@
 ├── go.sum              # Dependency checksums
 └── README.md           # Project overview
 
+database
+docker run --name my-postgres-container \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=admin \
+  -e POSTGRES_DB=yourdatabase \
+  -p 5432:5432 \
+  -d postgres
+
+  psql -h localhost -p 5432 -U admin -d postgres
+
+ SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE'
+ORDER BY table_name;

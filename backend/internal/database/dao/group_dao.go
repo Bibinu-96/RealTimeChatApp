@@ -1,29 +1,88 @@
 package dao
 
-import "backend/internal/database/models"
+import (
+	"backend/internal/database/models"
 
-// CreateGroup inserts a new group into the database
-func CreateGroup(group *models.Group) error {
-	return GetDB().Create(group).Error
+	"gorm.io/gorm"
+)
+
+type GroupDAO struct {
+	DB *gorm.DB
 }
 
-// FindGroupByID retrieves a group by ID
-func FindGroupByID(groupID uint) (*models.Group, error) {
-	var group models.Group
-	err := GetDB().Preload("Members").First(&group, groupID).Error
-	return &group, err
-}
-
-// AddGroupMember adds a user to a group
-func AddGroupMember(groupID, userID uint) error {
-	groupMember := models.GroupMember{
-		GroupID: groupID,
-		UserID:  userID,
+func (dao *GroupDAO) Create(group *models.Group) error {
+	if err := dao.DB.Create(group).Error; err != nil {
+		return err
 	}
-	return GetDB().Create(&groupMember).Error
+	return nil
 }
 
-// RemoveGroupMember removes a user from a group
-func RemoveGroupMember(groupID, userID uint) error {
-	return GetDB().Where("group_id = ? AND user_id = ?", groupID, userID).Delete(&models.GroupMember{}).Error
+// GetCount gets the total count of groups in the database
+func (dao *GroupDAO) GetCount() (int64, error) {
+	var count int64
+	if err := dao.DB.Model(&models.Group{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (dao *GroupDAO) GetByID(groupID uint) (*models.Group, error) {
+	var group models.Group
+	if err := dao.DB.Preload("Members").Preload("Messages").First(&group, groupID).Error; err != nil {
+		return nil, err
+	}
+	return &group, nil
+}
+
+func (dao *GroupDAO) GetByName(groupName string) (*models.Group, error) {
+	var group models.Group
+	if err := dao.DB.Where("group_name = ?", groupName).First(&group).Error; err != nil {
+		return nil, err
+	}
+	return &group, nil
+}
+
+func (dao *GroupDAO) AddMember(groupID uint, userID uint) error {
+	var group models.Group
+	if err := dao.DB.First(&group, groupID).Error; err != nil {
+		return err
+	}
+
+	var user models.User
+	if err := dao.DB.First(&user, userID).Error; err != nil {
+		return err
+	}
+
+	// Add user to group members
+	if err := dao.DB.Model(&group).Association("Members").Append(&user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (dao *GroupDAO) RemoveMember(groupID uint, userID uint) error {
+	var group models.Group
+	if err := dao.DB.First(&group, groupID).Error; err != nil {
+		return err
+	}
+
+	var user models.User
+	if err := dao.DB.First(&user, userID).Error; err != nil {
+		return err
+	}
+
+	// Remove user from group members
+	if err := dao.DB.Model(&group).Association("Members").Delete(&user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (dao *GroupDAO) Delete(groupID uint) error {
+	if err := dao.DB.Delete(&models.Group{}, groupID).Error; err != nil {
+		return err
+	}
+	return nil
 }

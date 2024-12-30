@@ -17,11 +17,23 @@ type DBinitService struct {
 func (dbinit DBinitService) createorUpdateModelstoTables() error {
 
 	db := dao.GetDB()
-	err := db.AutoMigrate(&models.User{}, &models.Group{}, &models.Message{}, &models.GroupMember{})
+	// // Create the enum type first
+	// err := db.Exec("CREATE TYPE message_type_enum AS ENUM ('direct', 'group')").Error
+	// if err != nil {
+	// 	return err
+	// }
+
+	// Migrate in order of dependencies
+	err := db.AutoMigrate(
+		&models.User{},  // 1. Users
+		&models.Group{}, // 2. Groups
+		&models.Message{},
+	)
 	if err != nil {
-		dbinit.Log.Error("error creating or updating db")
+		return err
 	}
 
+	dbinit.Log.Info("Database migration completed successfully!")
 	return err
 }
 

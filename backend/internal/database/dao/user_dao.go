@@ -1,27 +1,57 @@
 package dao
 
-import "backend/internal/database/models"
+import (
+	"backend/internal/database/models"
 
-// CreateUser inserts a new user into the database
-func CreateUser(user *models.User) error {
-	return GetDB().Create(user).Error
+	"gorm.io/gorm"
+)
+
+type UserDAO struct {
+	DB *gorm.DB
 }
 
-// FindUserByID retrieves a user by ID
-func FindUserByID(userID uint) (*models.User, error) {
+// GetCount gets the total count of users in the database
+func (dao *UserDAO) GetCount() (int64, error) {
+	var count int64
+	if err := dao.DB.Model(&models.User{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (dao *UserDAO) Create(user *models.User) error {
+	if err := dao.DB.Create(user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dao *UserDAO) GetByID(userID uint) (*models.User, error) {
 	var user models.User
-	err := GetDB().First(&user, userID).Error
-	return &user, err
+	if err := dao.DB.First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-// FindUserByEmail retrieves a user by email
-func FindUserByEmail(email string) (*models.User, error) {
+func (dao *UserDAO) GetByUsername(username string) (*models.User, error) {
 	var user models.User
-	err := GetDB().Where("email = ?", email).First(&user).Error
-	return &user, err
+	if err := dao.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-// DeleteUser removes a user by ID
-func DeleteUser(userID uint) error {
-	return GetDB().Delete(&models.User{}, userID).Error
+func (dao *UserDAO) Update(user *models.User) error {
+	if err := dao.DB.Save(user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dao *UserDAO) Delete(userID uint) error {
+	if err := dao.DB.Delete(&models.User{}, userID).Error; err != nil {
+		return err
+	}
+	return nil
 }

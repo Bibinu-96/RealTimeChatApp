@@ -25,8 +25,8 @@ func SetupGinRouter() *gin.Engine {
 
 // RegisterUser handles user registration
 func RegisterUser(c *gin.Context) {
-	// Implement your logic here
-	c.JSON(http.StatusOK, gin.H{"message": "Register user logic not implemented from gin"})
+
+	c.JSON(http.StatusOK, gin.H{"message": "empty logic"})
 }
 
 // LoginUser handles user login
