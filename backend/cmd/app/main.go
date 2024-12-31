@@ -12,6 +12,7 @@ import (
 	"backend/internal/database/database"
 	"backend/pkg/logger"
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -28,7 +29,6 @@ func main() {
 
 	// Create a new logger instance
 	log = logger.GetLogrusLogger()
-	dsn := "host=localhost user=admin password=admin dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
 	// Set Task channel
 	channels.SetTaskChannel(make(chan interface{}, 10))
 
@@ -37,6 +37,18 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file: %v", err)
 	}
+	// Get the values from environment variables
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	port := os.Getenv("DB_PORT")
+	sslmode := os.Getenv("DB_SSLMODE")
+	timezone := os.Getenv("DB_TIMEZONE")
+
+	// Construct the DSN string
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+		host, user, password, dbname, port, sslmode, timezone)
 	// Create a context to handle shutdown signals
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -73,6 +85,7 @@ func main() {
 	ginApiServerervice := server.NewServer(serverConfig1, "GinApiServer", log)
 	components = append(components, ginApiServerervice)
 
+	// websocket server
 	wsServer := websocket.Websocket{
 		Addr: ":8001",
 		Name: "websocket",

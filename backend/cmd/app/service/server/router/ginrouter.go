@@ -17,7 +17,7 @@ func SetupGinRouter() *gin.Engine {
 	{
 		api.POST("/register", RegisterUser)
 		api.POST("/login", LoginUser)
-		api.GET("/users/connected", CheckAuth, GetConnectedUsers)
+		api.GET("/users/", CheckAuth, GetConnectedUsers)
 		api.GET("/groups/", CheckAuth, GetGroups)
 		api.GET("/messages/direct", CheckAuth, GetDirectMessages)
 		api.GET("/messages/group", CheckAuth, GetGroupMessages)
