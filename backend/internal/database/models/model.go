@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type MessageType string
@@ -12,12 +14,13 @@ const (
 )
 
 type User struct {
-	UserID       uint      `gorm:"primaryKey"`
-	Username     string    `gorm:"size:50;not null;unique"`
-	Email        string    `gorm:"size:100;not null;unique"`
-	PasswordHash string    `gorm:"size:255;not null"` // Added PasswordHash field
-	PhoneNumber  *string   `gorm:"size:20"`
-	Messages     []Message `gorm:"foreignKey:SenderID;constraint:OnDelete:CASCADE"`
+	UserID          uint          `gorm:"primaryKey"`
+	Username        string        `gorm:"size:50;not null;unique"`
+	Email           string        `gorm:"size:100;not null;unique"`
+	PasswordHash    string        `gorm:"size:255;not null"` // Added PasswordHash field
+	PhoneNumber     *string       `gorm:"size:20"`
+	Messages        []Message     `gorm:"foreignKey:SenderID;constraint:OnDelete:CASCADE"`
+	InteractedUsers pq.Int64Array `gorm:"type:bigint[];default:ARRAY[]::bigint[]"` // Array of interacted user IDs
 }
 
 type Group struct {
