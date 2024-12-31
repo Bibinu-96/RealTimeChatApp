@@ -2,11 +2,13 @@ package main
 
 import (
 	"backend/cmd/app/service"
+	"backend/cmd/app/service/backgroundjob"
 	"backend/cmd/app/service/dbinitservice"
 	"backend/cmd/app/service/server"
 	"backend/cmd/app/service/server/config"
 	"backend/cmd/app/service/server/router"
 	"backend/cmd/app/service/websocket"
+	"backend/internal/channels"
 	"backend/internal/database/database"
 	"backend/pkg/logger"
 	"context"
@@ -25,6 +27,8 @@ func main() {
 	// Create a new logger instance
 	log = logger.GetLogrusLogger()
 	dsn := "host=localhost user=admin password=admin dbname=postgres port=5432 sslmode=disable TimeZone=UTC"
+	// Set Task channel
+	channels.SetTaskChannel(make(chan interface{}, 10))
 
 	// Create a context to handle shutdown signals
 	ctx, cancel := context.WithCancel(context.Background())
@@ -38,6 +42,11 @@ func main() {
 		log.Info("Received shutdown signal, terminating services...")
 		cancel()
 	}()
+
+	// Background Service
+	bgService := backgroundjob.BackgroundJob{Log: log, Name: "BackGround Service"}
+
+	components = append(components, bgService)
 
 	// Database Init Service
 	dbInitService := dbinitservice.DBinitService{

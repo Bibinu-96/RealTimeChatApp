@@ -5,10 +5,15 @@ import (
 	"backend/internal/database/models"
 	"backend/pkg/logger"
 	"errors"
+	"log"
+	"net/smtp"
 	"sync"
 	"time"
 
+	"backend/internal/channels"
+
 	"github.com/golang-jwt/jwt/v5"
+	emailpkg "github.com/jordan-wright/email"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -32,6 +37,15 @@ type LOGIN struct {
 	EMAIL    string `json:"email" binding:"required"`
 	PASSWORD string `json:"password" binding:"required"`
 	PHONENO  string `json:"phoneno" binding:"omitempty"`
+}
+
+type email struct {
+	smtpHost    string
+	smtpPort    string
+	senderEmail string
+	password    string
+	Subject     string
+	Body        string
 }
 
 type UserService struct {
@@ -80,6 +94,7 @@ func (us UserService) RegisterUserForApp(toBeRegisteredUser RegisterUser) error 
 		us.log.Error("error creating user", err)
 		return err
 	}
+	us.SendEmail(user.Email, user.Username)
 	return nil
 
 }
@@ -118,5 +133,54 @@ func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) (string, error) {
 	}
 
 	return token, nil
+
+}
+
+func (us UserService) SendEmail(to, name string) {
+
+	// send mail asynchronous ,let background service take care of status of job
+	var mailJob channels.Job
+	mailJob = func(errChan chan error, status chan string) {
+
+		err := sendMailtoRegisterUser(to, name)
+		if err != nil {
+			errChan <- err
+		} else {
+			status <- "Email sent successfully"
+		}
+
+	}
+
+	taskChannel := channels.GetTaskChannel()
+	go func() {
+		taskChannel <- mailJob
+	}()
+
+}
+
+func sendMailtoRegisterUser(to, name string) error {
+
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+	senderEmail := "vipin.kunam123@gmail.com"
+	password := "kgnw sfaq hisx dswl"
+
+	// Create a new email
+	e := emailpkg.NewEmail()
+	e.From = "Vipin K <vipin.kunam123@gmail.com>"
+	e.To = []string{to}
+	e.Subject = "You are caught!"
+	message := "Hello, " + name + "!\nWelcome to ChatApp!."
+	e.Text = []byte(message)
+
+	// Send the email
+	err := e.Send(smtpHost+":"+smtpPort, smtp.PlainAuth("", senderEmail, password, smtpHost))
+	if err != nil {
+		return err
+	}
+
+	log.Println("Email sent successfully!")
+
+	return nil
 
 }
