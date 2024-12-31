@@ -14,7 +14,7 @@ type BackgroundJob struct {
 }
 
 func (bg BackgroundJob) Run(ctx context.Context) error {
-	bg.Log.Info("Running background task")
+	bg.Log.Info("Running background Jobs")
 	errChan := make(chan error, 3)
 	statusChannel := make(chan string, 3)
 	taskChannel := channels.GetTaskChannel()

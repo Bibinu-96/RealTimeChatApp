@@ -17,6 +17,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -30,6 +32,11 @@ func main() {
 	// Set Task channel
 	channels.SetTaskChannel(make(chan interface{}, 10))
 
+	// Load the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file: %v", err)
+	}
 	// Create a context to handle shutdown signals
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

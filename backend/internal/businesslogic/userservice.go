@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"net/smtp"
+	"os"
 	"sync"
 	"time"
 
@@ -25,6 +26,9 @@ var (
 )
 
 const Secret = "mychatapp"
+const subject = "You are caught!"
+const body = "\nWelcome to ChatApp!"
+const from = "Vipin K <vipin.kunam123@gmail.com>"
 
 type RegisterUser struct {
 	USERNAME string `json:"username" binding:"required"`
@@ -160,17 +164,17 @@ func (us UserService) SendEmail(to, name string) {
 
 func sendMailtoRegisterUser(to, name string) error {
 
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-	senderEmail := "vipin.kunam123@gmail.com"
-	password := "kgnw sfaq hisx dswl"
+	smtpHost := os.Getenv("SMPT_HOST")
+	smtpPort := os.Getenv("SMPT_PORT")
+	senderEmail := os.Getenv("SENDER_EMAIL")
+	password := os.Getenv("PASSWORD")
 
 	// Create a new email
 	e := emailpkg.NewEmail()
-	e.From = "Vipin K <vipin.kunam123@gmail.com>"
+	e.From = from
 	e.To = []string{to}
-	e.Subject = "You are caught!"
-	message := "Hello, " + name + "!\nWelcome to ChatApp!."
+	e.Subject = subject
+	message := "Hello, " + name + body
 	e.Text = []byte(message)
 
 	// Send the email
