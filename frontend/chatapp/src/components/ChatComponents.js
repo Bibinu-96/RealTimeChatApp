@@ -34,6 +34,7 @@ const SignUp = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("formdata",formData)
     // Handle signup logic
   };
 
@@ -100,6 +101,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("formdata",formData)
     // Handle login logic
   };
 

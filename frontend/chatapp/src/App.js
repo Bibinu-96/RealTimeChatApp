@@ -6,7 +6,8 @@ import {
   ArrowBack as ArrowBackIcon,
   Home as HomeIcon
 } from '@mui/icons-material';
-import { SignUp, Login, ChatList, GroupChatList, ChatRoom, GroupChatRoom } from './components/ChatComponents';
+import { Login, ChatList, GroupChatList, ChatRoom, GroupChatRoom } from './components/ChatComponents';
+import SignUp from './components/Signup';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -77,11 +78,11 @@ const theme = createTheme({
 
 const App = () => {
   // Simple auth state management (replace with proper auth system)
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Protected Route component
   const ProtectedRoute = ({ children }) => {
-    return true ? children : <Navigate to="/login" />;
+    return isAuthenticated ? children : <Navigate to="/login" />;
   };
 
   return (
@@ -132,7 +133,7 @@ const App = () => {
             <Route
               path="/"
               element={
-                true ? (
+                isAuthenticated ? (
                   <Navigate to="/chats" replace />
                 ) : (
                   <Navigate to="/login" replace />
