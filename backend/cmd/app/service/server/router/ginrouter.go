@@ -5,6 +5,7 @@ import (
 
 	"backend/internal/businesslogic"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,6 +13,13 @@ func SetupGinRouter() *gin.Engine {
 	// Initialize Gin router
 	r := gin.Default()
 
+	// CORS Middleware to allow all methods and all origins
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:  []string{"*"}, // Allow all origins
+		AllowMethods:  []string{"*"}, // Allow all methods
+		AllowHeaders:  []string{"*"}, // Allow all headers
+		ExposeHeaders: []string{"*"}, // Expose all headers
+	}))
 	// Create API routes
 	api := r.Group("/api")
 	{

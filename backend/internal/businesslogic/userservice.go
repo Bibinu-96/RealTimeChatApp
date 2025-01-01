@@ -68,7 +68,7 @@ func (us UserService) RegisterUserForApp(toBeRegisteredUser RegisterUser) error 
 	userDao := dao.GetUserDaoInstance()
 	user, err := userDao.GetByEmail(toBeRegisteredUser.EMAIL)
 
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		us.log.Error("error getting user", err)
 		return err
 	}
