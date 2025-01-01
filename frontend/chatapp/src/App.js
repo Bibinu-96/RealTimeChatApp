@@ -132,7 +132,7 @@ const App = () => {
             <Route
               path="/"
               element={
-                isAuthenticated ? (
+                true ? (
                   <Navigate to="/chats" replace />
                 ) : (
                   <Navigate to="/login" replace />
