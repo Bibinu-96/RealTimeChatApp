@@ -110,7 +110,13 @@ func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) (string, error) {
 
 	if err != nil {
 		us.log.Error("error getting user", err)
-		return "", err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", errors.New("user not Signedup")
+
+		} else {
+			return "", err
+		}
+
 	}
 
 	if user.UserID == 0 {

@@ -6,11 +6,12 @@ import {
   ArrowBack as ArrowBackIcon,
   Home as HomeIcon
 } from '@mui/icons-material';
-import { Login, ChatList, GroupChatList, ChatRoom, GroupChatRoom } from './components/ChatComponents';
+import {ChatList, GroupChatList, ChatRoom, GroupChatRoom } from './components/ChatComponents';
 import SignUp from './components/Signup';
-import { useState } from 'react';
+import Login from './components/Login';
+import { useState,useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import {jwtDecode} from 'jwt-decode';
 // Navigation component with back button and title
 const NavigationHeader = ({ title }) => {
   const navigate = useNavigate();
@@ -75,16 +76,56 @@ const theme = createTheme({
     },
   },
 });
-
 const App = () => {
   // Simple auth state management (replace with proper auth system)
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+ // checkAuth()
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+        return decodedToken.exp > currentTime; // Check if token is valid
+      } catch (error) {
+        console.error('Invalid token:', error);
+        localStorage.removeItem('authToken');
+      }
+    }
+    return false;
+  });
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken'); // or sessionStorage.getItem('authToken')
+    
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token); // Decode the JWT
+        const currentTime = Date.now() / 1000; // Current time in seconds
+
+        if (decodedToken.exp > currentTime) {
+          // Token is valid
+          setIsAuthenticated(true);
+        } else {
+          // Token is expired
+          localStorage.removeItem('authToken'); // Clear expired token
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        localStorage.removeItem('authToken'); // Clear invalid token
+        setIsAuthenticated(false);
+      }
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
 
   // Protected Route component
   const ProtectedRoute = ({ children }) => {
     return isAuthenticated ? children : <Navigate to="/login" />;
   };
-
+  console.log("isAuthenticatedByServer ",isAuthenticated)
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

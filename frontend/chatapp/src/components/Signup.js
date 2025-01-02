@@ -64,7 +64,9 @@ const SignUp = () => {
     setErrorDialogStatus(false)
   }
   const alertDialog = showErrorDialog?<AlertDialog handleClose={handleClose} content={alertContent}/>:null
-
+const goToLogin=()=>{
+  navigate('/login'); 
+}
   return (
     
 
@@ -126,6 +128,15 @@ const SignUp = () => {
               Register
             </Button>
           </Box>
+           <Button
+            onClick={goToLogin}
+            fullWidth
+            variant="contained"
+            color="error"
+            sx={{ mt: 3, mb: 2 }}
+            >
+            Login
+            </Button>
           {alertDialog}
         </Paper>
 

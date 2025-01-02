@@ -13,6 +13,11 @@ const axiosInstance = axios.create({
 // Add request interceptor to show progress bar
 axiosInstance.interceptors.request.use(
   (config) => {
+     // Retrieve the token
+      const token = localStorage.getItem('authToken'); // or sessionStorage.getItem('authToken')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     NProgress.start(); // Start progress bar on request
     return config;
   },
