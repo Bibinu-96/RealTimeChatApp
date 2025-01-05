@@ -12,6 +12,14 @@ var chatInstance *ChatService
 type ChatService struct {
 	log logger.Logger
 }
+type InteractedUser struct {
+	UserEmailId string `json:"emailId" binding:"required"`
+}
+
+type PaginationInfo struct {
+	Page     int `json:"page" binding:"required"`
+	PageSize int `json:"size" binding:"required"`
+}
 
 func GetChatServiceInstance() *ChatService {
 	once.Do(func() {
@@ -20,13 +28,13 @@ func GetChatServiceInstance() *ChatService {
 	return chatInstance
 }
 
-func (cs ChatService) AddUserToInteractedListOfCurrentUser(currentUser *models.User, toBeAddedUserEmailId string) error {
+func (cs ChatService) AddUserToInteractedListOfCurrentUser(currentUser *models.User, toBeAddedUser InteractedUser) error {
 
 	userDao := dao.GetUserDaoInstance()
 
 	// Check for user already signedup
 
-	toBeAddedUserFromDb, err := userDao.GetByEmail(toBeAddedUserEmailId)
+	toBeAddedUserFromDb, err := userDao.GetByEmail(toBeAddedUser.UserEmailId)
 
 	if err != nil {
 		return err
@@ -36,25 +44,44 @@ func (cs ChatService) AddUserToInteractedListOfCurrentUser(currentUser *models.U
 		return errors.New("User does not exist")
 	}
 
-	currentUser.AddInteractedUser(int64(toBeAddedUserFromDb.UserID))
+	userInteractionDao := dao.GetUserInteractionDAO()
 
-	err = userDao.Update(currentUser)
+	yes, err := userInteractionDao.InteractionExists(currentUser.UserID, toBeAddedUserFromDb.UserID)
+
 	if err != nil {
-		cs.log.Error("error updating current user while adding interacted user ", currentUser.Email, err)
 		return err
+	}
+
+	if !yes {
+		err = userInteractionDao.InsertInteraction(currentUser.UserID, toBeAddedUserFromDb.UserID)
+		if err != nil {
+			return err
+		}
+	}
+	yes, err = userInteractionDao.InteractionExists(toBeAddedUserFromDb.UserID, currentUser.UserID)
+
+	if err != nil {
+		return err
+	}
+
+	if !yes {
+		err = userInteractionDao.InsertInteraction(toBeAddedUserFromDb.UserID, currentUser.UserID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 
 }
 
-func (cs ChatService) RemoveUserFromInteractedListOfCurrentUser(currentUser *models.User, toBeRemovedUserEmailId string) error {
+func (cs ChatService) RemoveUserFromInteractedListOfCurrentUser(currentUser *models.User, toBeRemovedUser InteractedUser) error {
 
 	userDao := dao.GetUserDaoInstance()
 
 	// Check for user already signedup
 
-	toBeRemovedUserFromDb, err := userDao.GetByEmail(toBeRemovedUserEmailId)
+	toBeRemovedUserFromDb, err := userDao.GetByEmail(toBeRemovedUser.UserEmailId)
 
 	if err != nil {
 		return err
@@ -63,33 +90,42 @@ func (cs ChatService) RemoveUserFromInteractedListOfCurrentUser(currentUser *mod
 	if toBeRemovedUserFromDb == nil || toBeRemovedUserFromDb.UserID == 0 {
 		return errors.New("User does not exist")
 	}
-	currentUser.RemoveInteractedUser(int64(toBeRemovedUserFromDb.UserID))
-	err = userDao.Update(currentUser)
+
+	userInteractionDao := dao.GetUserInteractionDAO()
+
+	yes, err := userInteractionDao.InteractionExists(currentUser.UserID, toBeRemovedUserFromDb.UserID)
 
 	if err != nil {
-		cs.log.Error("error updating current user while removing interacted user ", currentUser.Email, err)
 		return err
+	}
+	if yes {
+		err = userInteractionDao.DeleteInteraction(currentUser.UserID, toBeRemovedUserFromDb.UserID)
+		if err != nil {
+			return err
+		}
+	}
+
+	yes, err = userInteractionDao.InteractionExists(toBeRemovedUserFromDb.UserID, currentUser.UserID)
+
+	if err != nil {
+		return err
+	}
+
+	if yes {
+		err = userInteractionDao.DeleteInteraction(toBeRemovedUserFromDb.UserID, currentUser.UserID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (cs ChatService) GetInteractedUsers(currentUser *models.User) ([]*models.User, error) {
-	userDao := dao.GetUserDaoInstance()
-	interactedUsers, err := currentUser.GetInteractedUsers()
+func (cs ChatService) GetInteractedUsers(currentUser *models.User, paginationInfo PaginationInfo) ([]models.UserInteraction, int64, error) {
+	userInteractionDao := dao.GetUserInteractionDAO()
+	interactedUsers, totalInteractedUsers, err := userInteractionDao.GetInteractedUsers(currentUser.UserID, paginationInfo.Page, paginationInfo.PageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	interactedUsersList := make([]*models.User, len(interactedUsers))
-	for _, user := range interactedUsers {
-
-		userFromDb, err := userDao.GetByID(uint(user))
-		if err != nil {
-			return nil, err
-		}
-		interactedUsersList = append(interactedUsersList, userFromDb)
-
-	}
-
-	return interactedUsersList, nil
+	return interactedUsers, totalInteractedUsers, nil
 }

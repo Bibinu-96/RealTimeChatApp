@@ -73,6 +73,16 @@ func (u *User) RemoveInteractedUser(removeID int64) {
 	u.SetInteractedUsers(updatedIDs) // Update the field
 }
 
+type UserInteraction struct {
+	UserID           uint      `gorm:"primaryKey"` // The user who interacted
+	InteractedUserID uint      `gorm:"primaryKey"` // The user they interacted with
+	LastInteraction  time.Time `gorm:"not null"`   // Timestamp of the last interaction
+
+	// Foreign key relationships
+	User           User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	InteractedUser User `gorm:"foreignKey:InteractedUserID;constraint:OnDelete:CASCADE"`
+}
+
 type Group struct {
 	GroupID   uint   `gorm:"primaryKey"`
 	GroupName string `gorm:"size:50;not null"`

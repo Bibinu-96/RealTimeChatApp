@@ -63,6 +63,31 @@ func GetUserServiceInstance() *UserService {
 	})
 	return instance
 }
+
+func (us UserService) getUserIdGivenEmailId(email string) (uint, error) {
+
+	userDao := dao.GetUserDaoInstance()
+	user, err := userDao.GetByEmail(email)
+
+	if err != nil {
+		us.log.Error("error getting user", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("user not Signedup")
+
+		} else {
+			return 0, err
+		}
+
+	}
+
+	if user.UserID == 0 {
+		return 0, errors.New("user not found")
+	}
+
+	return user.UserID, nil
+
+}
+
 func (us UserService) RegisterUserForApp(toBeRegisteredUser RegisterUser) error {
 
 	userDao := dao.GetUserDaoInstance()
