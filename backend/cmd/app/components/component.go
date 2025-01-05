@@ -2,7 +2,7 @@ package service
 
 import "context"
 
-type Service interface {
+type Component interface {
 	Run(ctx context.Context) error
 	GetName() string
 }

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"backend/cmd/app/service"
-	"backend/cmd/app/service/backgroundjob"
-	"backend/cmd/app/service/dbinitservice"
-	"backend/cmd/app/service/server"
-	"backend/cmd/app/service/server/config"
-	"backend/cmd/app/service/server/router"
-	"backend/cmd/app/service/websocket"
+	components "backend/cmd/app/components"
+	"backend/cmd/app/components/backgroundjob"
+	"backend/cmd/app/components/dbinitservice"
+	"backend/cmd/app/components/server"
+	"backend/cmd/app/components/server/config"
+	"backend/cmd/app/components/server/router"
+	"backend/cmd/app/components/websocket"
 	"backend/internal/channels"
 	"backend/internal/database/database"
 	"backend/pkg/logger"
@@ -25,7 +25,7 @@ import (
 func main() {
 	var log logger.Logger
 	var wg sync.WaitGroup
-	components := []service.Service{}
+	appComponents := []components.Component{}
 
 	// Create a new logger instance
 	log = logger.GetLogrusLogger()
@@ -65,7 +65,7 @@ func main() {
 	// Background Service
 	bgService := backgroundjob.BackgroundJob{Log: log, Name: "BackGround Service"}
 
-	components = append(components, bgService)
+	appComponents = append(appComponents, bgService)
 
 	// Database Init Service
 	dbInitService := dbinitservice.DBinitService{
@@ -73,7 +73,7 @@ func main() {
 		Name:      "DBInitService",
 		GenericDb: database.PostgressDB{DSN: dsn},
 	}
-	components = append(components, &dbInitService)
+	appComponents = append(appComponents, &dbInitService)
 
 	// Gin Server
 	serverConfig1 := config.ServerConfig{
@@ -83,7 +83,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 	ginApiServerervice := server.NewServer(serverConfig1, "GinApiServer", log)
-	components = append(components, ginApiServerervice)
+	appComponents = append(appComponents, ginApiServerervice)
 
 	// websocket server
 	wsServer := websocket.Websocket{
@@ -92,12 +92,12 @@ func main() {
 		Log:  log,
 	}
 
-	components = append(components, &wsServer)
+	appComponents = append(appComponents, &wsServer)
 
 	// Run all services
-	for _, component := range components {
+	for _, component := range appComponents {
 		wg.Add(1)
-		go func(c service.Service) {
+		go func(c components.Component) {
 			defer wg.Done()
 
 			// Panic recovery wrapper

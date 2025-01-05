@@ -8,7 +8,7 @@ import (
 
 	"backend/pkg/logger"
 
-	"backend/cmd/app/service/server/config"
+	"backend/cmd/app/components/server/config"
 )
 
 type Server struct {
