@@ -104,18 +104,12 @@ func main() {
 		cancel()
 	}()
 
+	// Setup all the components
+
 	// Task Runner
-	bgService := &taskrunner.TaskRunner{Log: log, Name: "Task Runner"}
+	taskRunner := &taskrunner.TaskRunner{Log: log, Name: "Task Runner"}
 
-	appComponents = append(appComponents, bgService)
-
-	// // Database Init Service
-	// dbInitService := dbinitservice.DBinitService{
-	// 	Log:       log,
-	// 	Name:      "DBInitService",
-	// 	GenericDb: database.PostgressDB{DSN: dsn},
-	// }
-	//appComponents = append(appComponents, &dbInitService)
+	appComponents = append(appComponents, taskRunner)
 
 	// Gin Server
 	serverConfig := config.ServerConfig{
@@ -136,7 +130,7 @@ func main() {
 
 	appComponents = append(appComponents, &wsServer)
 
-	// Run all services
+	// Run all components
 	for _, component := range appComponents {
 		wg.Add(1)
 		go func(c components.Component) {
@@ -155,7 +149,7 @@ func main() {
 		}(component)
 	}
 
-	// Wait for all services to complete
+	// Wait for all components to complete
 	wg.Wait()
 	log.Info("All services stopped gracefully.")
 }
