@@ -2,19 +2,20 @@ package main
 
 import (
 	components "backend/cmd/app/components"
-	"backend/cmd/app/components/dbinitservice"
 	"backend/cmd/app/components/server"
 	"backend/cmd/app/components/server/config"
 	"backend/cmd/app/components/server/router"
 	taskrunner "backend/cmd/app/components/taskrunner"
 	"backend/cmd/app/components/websocket"
 	"backend/internal/channels"
+	"backend/internal/database/dao"
 	"backend/internal/database/database"
+	"backend/internal/database/database/postgres"
 	"backend/pkg/logger"
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -37,18 +38,59 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file: %v", err)
 	}
-	// Get the values from environment variables
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
-	sslmode := os.Getenv("DB_SSLMODE")
-	timezone := os.Getenv("DB_TIMEZONE")
 
-	// Construct the DSN string
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		host, user, password, dbname, port, sslmode, timezone)
+	// Set up Database
+
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		log.Fatal("error coverting port to integer", err)
+		return
+	}
+
+	// Construct db config
+	databaseConfig := database.DatabaseConfig{
+		Type:     database.PostgreSQL,
+		Host:     os.Getenv("DB_HOST"),
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   os.Getenv("DB_NAME"),
+		Port:     port,
+		Options:  "sslmode=disable",
+	}
+
+	// Construct dsn
+	dsn, err := database.GenerateDSN(databaseConfig)
+	if err != nil {
+		log.Fatal("error generating dsn", err)
+		return
+	}
+
+	var sqlDb database.Database
+	// Feel free to implement any type of sql database
+
+	sqlDb = &postgres.PostgresDb{
+		DSN: dsn,
+		Log: log,
+	}
+
+	// Initialize gorm and get the gorm db instance
+	db, err := sqlDb.InitDB()
+	if err != nil {
+		log.Fatal("error initialising db", err)
+		return
+	}
+
+	// Set the Dao
+	dao.SetDB(db)
+
+	// Run Migrations
+	err = sqlDb.RunMigrations(db)
+
+	if err != nil {
+		log.Fatal("error running migrations", err)
+		return
+	}
+
 	// Create a context to handle shutdown signals
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -67,13 +109,13 @@ func main() {
 
 	appComponents = append(appComponents, bgService)
 
-	// Database Init Service
-	dbInitService := dbinitservice.DBinitService{
-		Log:       log,
-		Name:      "DBInitService",
-		GenericDb: database.PostgressDB{DSN: dsn},
-	}
-	appComponents = append(appComponents, &dbInitService)
+	// // Database Init Service
+	// dbInitService := dbinitservice.DBinitService{
+	// 	Log:       log,
+	// 	Name:      "DBInitService",
+	// 	GenericDb: database.PostgressDB{DSN: dsn},
+	// }
+	//appComponents = append(appComponents, &dbInitService)
 
 	// Gin Server
 	serverConfig := config.ServerConfig{

@@ -1,6 +1,8 @@
-package database
+package postgres
 
 import (
+	"backend/internal/database/models"
+	"backend/pkg/logger"
 	"fmt"
 
 	"gorm.io/driver/postgres"
@@ -8,19 +10,20 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-type PostgressDB struct {
+type PostgresDb struct {
 	DSN string
+	Log logger.Logger
 }
 
-func (postgressDb PostgressDB) GetDB() (*gorm.DB, error) {
+func (postgresDb *PostgresDb) InitDB() (*gorm.DB, error) {
 	var err error
-	db, err := gorm.Open(postgres.Open(postgressDb.DSN), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(postgresDb.DSN), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: false, // Use plural table names
 		},
 	})
 	if err != nil {
-		fmt.Println("Error getting *sql.DB object:", err)
+		postgresDb.Log.Error("err getting postgress db", err)
 		return nil, err
 	}
 
@@ -40,4 +43,22 @@ func (postgressDb PostgressDB) GetDB() (*gorm.DB, error) {
 	//defer sqlDB.Close()
 
 	return db, nil
+}
+
+func (postgresDb *PostgresDb) RunMigrations(db *gorm.DB) error {
+
+	// Migrate in order of dependencies
+	err := db.AutoMigrate(
+		&models.User{},  // 1. Users
+		&models.Group{}, // 2. Groups
+		&models.Message{},
+		&models.UserInteraction{},
+	)
+	if err != nil {
+		return err
+	}
+
+	postgresDb.Log.Info("Database migration completed successfully!")
+	return nil
+
 }

@@ -11,7 +11,7 @@ var (
 	once sync.Once
 )
 
-func SetDb(database *gorm.DB) {
+func SetDB(database *gorm.DB) {
 	db = database
 }
 
