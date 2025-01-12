@@ -6,11 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 )
 
 type TaskRunner struct {
 	Log  logger.Logger
 	Name string
+	wg   sync.WaitGroup
 }
 
 func (tr TaskRunner) Run(ctx context.Context) error {
@@ -23,6 +25,7 @@ func (tr TaskRunner) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			tr.Log.Info("context cancelled", tr.Name)
+			tr.wg.Wait()
 			return errors.New("context cancelled")
 		case err := <-errChan:
 			tr.Log.Error("err occured", err)
@@ -43,6 +46,23 @@ func (tr TaskRunner) Run(ctx context.Context) error {
 					}()
 					castedValue.Invoke(errCh, statusCh)
 				}(errChan, statusChannel)
+			case PeriodicTask:
+				tr.Log.Info(" Intialising Periodic task", castedValue.Action.Name)
+				// create derived context
+				tr.wg.Add(1)
+				childctx, _ := context.WithCancel(ctx)
+				go func(ctx context.Context) {
+					defer tr.wg.Done()
+					// Panic recovery wrapper
+					defer func() {
+						if r := recover(); r != nil {
+							tr.Log.Error("Panic occurred in service", r, castedValue.GetName())
+						}
+					}()
+					// blocking the current goroutine
+					castedValue.Run(ctx)
+				}(childctx)
+
 			default:
 				tr.Log.Info("value is of an unknown type: %T\n", castedValue)
 

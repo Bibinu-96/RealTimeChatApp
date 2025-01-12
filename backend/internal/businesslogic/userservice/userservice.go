@@ -189,6 +189,7 @@ func (us UserService) SendEmail(to, name string) {
 	}
 
 	emailTask := taskrunner.Task{Name: "email task", Action: mailAction}
+	//emailperiodicTask := taskrunner.NewPeriodicTask(emailTask, time.NewTicker(3*time.Second))
 
 	taskChannel := channels.GetTaskChannel()
 	go func() {
