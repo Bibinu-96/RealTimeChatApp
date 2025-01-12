@@ -63,7 +63,7 @@ func main() {
 	}()
 
 	// Task Runner
-	bgService := taskrunner.TaskRunner{Log: log, Name: "BackGround Service"}
+	bgService := &taskrunner.TaskRunner{Log: log, Name: "Task Runner"}
 
 	appComponents = append(appComponents, bgService)
 
@@ -76,13 +76,13 @@ func main() {
 	appComponents = append(appComponents, &dbInitService)
 
 	// Gin Server
-	serverConfig1 := config.ServerConfig{
+	serverConfig := config.ServerConfig{
 		Addr:         ":8000",
 		Router:       router.SetupGinRouter(),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	ginApiServerervice := server.NewServer(serverConfig1, "GinApiServer", log)
+	ginApiServerervice := server.NewServer(serverConfig, "GinApiServer", log)
 	appComponents = append(appComponents, ginApiServerervice)
 
 	// websocket server

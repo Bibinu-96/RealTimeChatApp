@@ -3,6 +3,7 @@ package taskrunner
 import (
 	"backend/pkg/logger"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -21,8 +22,8 @@ func NewPeriodicTask(action Task, ticker *time.Ticker) PeriodicTask {
 	}
 }
 
-func (t PeriodicTask) Run(ctx context.Context) {
-	t.Log.Info("Running background Jobs")
+func (t PeriodicTask) Run(ctx context.Context) error {
+	t.Log.Info("Running Period task ", t.GetName())
 	errChan := make(chan error, 3)
 	statusChannel := make(chan string, 3)
 	//t.Action(errChan, statusChan)
@@ -31,7 +32,7 @@ func (t PeriodicTask) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			t.Log.Info("context cancelled", t.Action.Name)
-			return
+			return errors.New("Context canceled in " + t.GetName())
 		case err := <-errChan:
 			t.Log.Error("err occured", err)
 			//return err
