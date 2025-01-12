@@ -1,0 +1,4 @@
+docker build -t reactdev .
+docker run -v RealTimeChatApp/frontend/chatapp:/app --name react -it reactdev:latest
+docker run -v /Users/vke/Desktop/Projects/APPS/ChatApp/RealTimeChatApp/frontend/chatapp:/app --name react -it -p 3001:3001  reactdev:latest
+docker start react

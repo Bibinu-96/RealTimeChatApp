@@ -1,6 +1,7 @@
-package businesslogic
+package userservice
 
 import (
+	"backend/cmd/app/components/taskrunner"
 	"backend/internal/database/dao"
 	"backend/internal/database/models"
 	"backend/pkg/logger"
@@ -12,6 +13,8 @@ import (
 	"time"
 
 	"backend/internal/channels"
+
+	"backend/internal/businesslogic"
 
 	"github.com/golang-jwt/jwt/v5"
 	emailpkg "github.com/jordan-wright/email"
@@ -25,7 +28,6 @@ var (
 	mutex    sync.Mutex
 )
 
-const Secret = "mychatapp"
 const subject = "You are caught!"
 const body = "\nWelcome to ChatApp!"
 const from = "Vipin K <vipin.kunam123@gmail.com>"
@@ -160,7 +162,7 @@ func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) (string, error) {
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err := generateToken.SignedString([]byte(Secret))
+	token, err := generateToken.SignedString([]byte(businesslogic.Secret))
 
 	if err != nil {
 		us.log.Error("error generating jwt token", err)
@@ -174,8 +176,8 @@ func (us UserService) LoginUserForApp(toBeLoggedinUser LOGIN) (string, error) {
 func (us UserService) SendEmail(to, name string) {
 
 	// send mail asynchronous ,let background service take care of status of job
-	var mailJob channels.Job
-	mailJob = func(errChan chan error, status chan string) {
+
+	mailAction := func(errChan chan error, status chan string) {
 
 		err := sendMailtoRegisterUser(to, name)
 		if err != nil {
@@ -186,9 +188,11 @@ func (us UserService) SendEmail(to, name string) {
 
 	}
 
+	emailTask := taskrunner.Task{Name: "email task", Action: mailAction}
+
 	taskChannel := channels.GetTaskChannel()
 	go func() {
-		taskChannel <- mailJob
+		taskChannel <- emailTask
 	}()
 
 }

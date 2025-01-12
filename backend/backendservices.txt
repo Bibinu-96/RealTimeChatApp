@@ -40,3 +40,10 @@ FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_type = 'BASE TABLE'
 ORDER BY table_name;
+
+docker run --name my-postgres-container \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=admin \
+  -e POSTGRES_DB=admin \
+  -p 5432:5432 \
+  -d postgres

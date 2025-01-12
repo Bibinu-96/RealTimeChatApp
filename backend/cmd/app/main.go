@@ -2,11 +2,11 @@ package main
 
 import (
 	components "backend/cmd/app/components"
-	"backend/cmd/app/components/backgroundjob"
 	"backend/cmd/app/components/dbinitservice"
 	"backend/cmd/app/components/server"
 	"backend/cmd/app/components/server/config"
 	"backend/cmd/app/components/server/router"
+	taskrunner "backend/cmd/app/components/taskrunner"
 	"backend/cmd/app/components/websocket"
 	"backend/internal/channels"
 	"backend/internal/database/database"
@@ -62,8 +62,8 @@ func main() {
 		cancel()
 	}()
 
-	// Background Service
-	bgService := backgroundjob.BackgroundJob{Log: log, Name: "BackGround Service"}
+	// Task Runner
+	bgService := taskrunner.TaskRunner{Log: log, Name: "BackGround Service"}
 
 	appComponents = append(appComponents, bgService)
 

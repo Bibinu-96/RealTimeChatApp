@@ -1,4 +1,4 @@
-package backgroundjob
+package taskrunner
 
 import (
 	"backend/internal/channels"
@@ -8,13 +8,13 @@ import (
 	"fmt"
 )
 
-type BackgroundJob struct {
+type TaskRunner struct {
 	Log  logger.Logger
 	Name string
 }
 
-func (bg BackgroundJob) Run(ctx context.Context) error {
-	bg.Log.Info("Running background Jobs")
+func (tr TaskRunner) Run(ctx context.Context) error {
+	tr.Log.Info("Running background Jobs")
 	errChan := make(chan error, 3)
 	statusChannel := make(chan string, 3)
 	taskChannel := channels.GetTaskChannel()
@@ -22,18 +22,18 @@ func (bg BackgroundJob) Run(ctx context.Context) error {
 
 		select {
 		case <-ctx.Done():
-			bg.Log.Info("context cancelled", bg.Name)
+			tr.Log.Info("context cancelled", tr.Name)
 			return errors.New("context cancelled")
 		case err := <-errChan:
-			bg.Log.Error("err occured", err)
+			tr.Log.Error("err occured", err)
 			//return err
 		case status := <-statusChannel:
-			bg.Log.Info("status", status)
+			tr.Log.Info("status", status)
 
 		case config := <-taskChannel:
 			switch castedValue := config.(type) {
-			case channels.Job:
-				bg.Log.Info(" executing the task")
+			case Task:
+				tr.Log.Info(" executing the task")
 				go func(errCh chan error, statusCh chan string) {
 					defer func() {
 						if r := recover(); r != nil {
@@ -41,10 +41,10 @@ func (bg BackgroundJob) Run(ctx context.Context) error {
 							errCh <- fmt.Errorf("panic occurred: %v", r)
 						}
 					}()
-					castedValue(errCh, statusCh)
+					castedValue.Invoke(errCh, statusCh)
 				}(errChan, statusChannel)
 			default:
-				bg.Log.Info("value is of an unknown type: %T\n", castedValue)
+				tr.Log.Info("value is of an unknown type: %T\n", castedValue)
 
 			}
 		}
@@ -52,6 +52,6 @@ func (bg BackgroundJob) Run(ctx context.Context) error {
 
 }
 
-func (bg BackgroundJob) GetName() string {
-	return bg.Name
+func (tr TaskRunner) GetName() string {
+	return tr.Name
 }

@@ -1,13 +1,15 @@
-package businesslogic
+package chatservice
 
 import (
 	"backend/internal/database/dao"
 	"backend/internal/database/models"
 	"backend/pkg/logger"
 	"errors"
+	"sync"
 )
 
 var chatInstance *ChatService
+var once sync.Once
 
 type ChatService struct {
 	log logger.Logger

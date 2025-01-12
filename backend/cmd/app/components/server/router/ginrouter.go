@@ -3,7 +3,9 @@ package router
 import (
 	"net/http"
 
-	"backend/internal/businesslogic"
+	"backend/cmd/app/components/server/middleware"
+	"backend/internal/businesslogic/chatservice"
+	"backend/internal/businesslogic/userservice"
 	"backend/internal/database/models"
 
 	"github.com/gin-contrib/cors"
@@ -26,12 +28,12 @@ func SetupGinRouter() *gin.Engine {
 	{
 		api.POST("/register", RegisterUser)
 		api.POST("/login", LoginUser)
-		api.POST("/users/interaction", CheckAuth, AddInteractedUser)
-		api.DELETE("/users/interaction", CheckAuth, DeleteInteractedUsers)
-		api.POST("/users/interactions", CheckAuth, GetInteractedUsers) // get of all interacted users
-		api.GET("/groups/", CheckAuth, GetGroups)
-		api.GET("/messages/direct", CheckAuth, GetDirectMessages)
-		api.GET("/messages/group", CheckAuth, GetGroupMessages)
+		api.POST("/users/interaction", middleware.CheckAuth, AddInteractedUser)
+		api.DELETE("/users/interaction", middleware.CheckAuth, DeleteInteractedUsers)
+		api.POST("/users/interactions", middleware.CheckAuth, GetInteractedUsers) // get of all interacted users
+		api.GET("/groups/", middleware.CheckAuth, GetGroups)
+		api.GET("/messages/direct", middleware.CheckAuth, GetDirectMessages)
+		api.GET("/messages/group", middleware.CheckAuth, GetGroupMessages)
 	}
 	return r
 }
@@ -39,10 +41,10 @@ func SetupGinRouter() *gin.Engine {
 // RegisterUser handles user registration
 func RegisterUser(c *gin.Context) {
 
-	var register businesslogic.RegisterUser
+	var register userservice.RegisterUser
 	err := c.BindJSON(&register)
 	if err == nil {
-		userService := businesslogic.GetUserServiceInstance()
+		userService := userservice.GetUserServiceInstance()
 		err = userService.RegisterUserForApp(register)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -57,10 +59,10 @@ func RegisterUser(c *gin.Context) {
 // LoginUser handles user login
 func LoginUser(c *gin.Context) {
 	// Implement your logic here
-	var loginUser businesslogic.LOGIN
+	var loginUser userservice.LOGIN
 	err := c.BindJSON(&loginUser)
 	if err == nil {
-		userService := businesslogic.GetUserServiceInstance()
+		userService := userservice.GetUserServiceInstance()
 		token, err := userService.LoginUserForApp(loginUser)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -78,11 +80,11 @@ func GetInteractedUsers(c *gin.Context) {
 	if exists {
 		currentUser = user.(*models.User)
 	}
-	var paginationInfo businesslogic.PaginationInfo
+	var paginationInfo chatservice.PaginationInfo
 	err := c.BindJSON(&paginationInfo)
 
 	if err == nil {
-		chatSevice := businesslogic.GetChatServiceInstance()
+		chatSevice := chatservice.GetChatServiceInstance()
 		interactedUsers, total, err := chatSevice.GetInteractedUsers(currentUser, paginationInfo)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -102,11 +104,11 @@ func AddInteractedUser(c *gin.Context) {
 		currentUser = user.(*models.User)
 	}
 
-	var interactedUser businesslogic.InteractedUser
+	var interactedUser chatservice.InteractedUser
 	err := c.BindJSON(&interactedUser)
 
 	if err == nil {
-		chatSevice := businesslogic.GetChatServiceInstance()
+		chatSevice := chatservice.GetChatServiceInstance()
 		err = chatSevice.AddUserToInteractedListOfCurrentUser(currentUser, interactedUser)
 		c.JSON(400, gin.H{"error": err.Error()})
 
@@ -121,11 +123,11 @@ func DeleteInteractedUsers(c *gin.Context) {
 	if exists {
 		currentUser = user.(*models.User)
 	}
-	var interactedUser businesslogic.InteractedUser
+	var interactedUser chatservice.InteractedUser
 	err := c.BindJSON(&interactedUser)
 
 	if err == nil {
-		chatSevice := businesslogic.GetChatServiceInstance()
+		chatSevice := chatservice.GetChatServiceInstance()
 		err = chatSevice.RemoveUserFromInteractedListOfCurrentUser(currentUser, interactedUser)
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
